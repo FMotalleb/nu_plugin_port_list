@@ -15,4 +15,3 @@ nu-plugin = "0.86.0"
 nu-protocol = { version = "0.86.0", features = ["plugin"] }
 netstat2 = "0.9.0"
 sysinfo = "0.29.10"
-lazy_static = "1.4.0"

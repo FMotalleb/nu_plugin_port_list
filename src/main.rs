@@ -3,15 +3,11 @@ use std::{net::IpAddr, collections::HashMap};
 use netstat2::{AddressFamilyFlags, ProtocolFlags, get_sockets_info, ProtocolSocketInfo};
 use nu_plugin::{self, EvaluatedCall, LabeledError};
 use nu_protocol::{record, Category, PluginSignature, Span, Value};
-use lazy_static::lazy_static;
+
 use sysinfo::{
    System, SystemExt, ProcessExt, Process,
 };
-lazy_static! {
-    pub static ref  SYSTEM: System = {
-        return System::new_all();
-    };
-}
+
 pub struct Plugin;
 
 impl nu_plugin::Plugin for Plugin {
@@ -47,7 +43,13 @@ impl nu_plugin::Plugin for Plugin {
         if call.has_flag("disable-tcp") {
             proto_flags=proto_flags & ProtocolFlags::UDP;
         }
-        
+        let mut process_list: HashMap<String, &Process>=HashMap::new();
+        let sys=System::new_all();
+        if skip_process_info!=true {
+            sys.processes().into_iter().for_each(|(pid, process)| {
+                process_list.insert(pid.to_owned().to_string(),process);
+            });
+        }
         // let af_flags =  AddressFamilyFlags::IPV4 | AddressFamilyFlags::IPV6;
         
         let sockets_info = get_sockets_info(af_flags, proto_flags);
@@ -66,8 +68,8 @@ impl nu_plugin::Plugin for Plugin {
                                     "remote_address" => Value::string(tcp_si.remote_addr.to_string(),call.head),
                                     "remote_port" => Value::int(tcp_si.remote_port.into(),call.head),
                                     "state" => Value::string(tcp_si.state.to_string(),call.head),
-                                    "pid"=>map_to_values(&si.associated_pids,call.head),
-                                    "process"=>load_process_info(&si.associated_pids,skip_process_info,call.head)
+                                    "pid"=>load_pid(&si.associated_pids,call.head),
+                                    "process"=>load_process_info(&si.associated_pids,skip_process_info,call.head,&process_list)
                                     
                                 }, 
                                 call.head)
@@ -83,8 +85,8 @@ impl nu_plugin::Plugin for Plugin {
                                     "remote_address" => Value::string("Unknown".to_string(),call.head),
                                     "remote_port" => Value::string("Unknown".to_string(),call.head),
                                     "state" => Value::string("Unknown".to_string(),call.head),
-                                    "pid"=>map_to_values(&si.associated_pids,call.head),
-                                    "process"=>load_process_info(&si.associated_pids,skip_process_info,call.head)
+                                    "pid"=>load_pid(&si.associated_pids,call.head),
+                                    "process"=>load_process_info(&si.associated_pids,skip_process_info,call.head,&process_list)
                                 },
                                 call.head)
                             )
@@ -107,31 +109,24 @@ impl nu_plugin::Plugin for Plugin {
 fn main() {
     nu_plugin::serve_plugin(&mut Plugin {}, nu_plugin::MsgPackSerializer {})
 }
-fn map_to_values(items: &Vec<u32>, span: Span) -> Value {
-    
+fn load_pid(items: &Vec<u32>, span: Span) -> Value {
     let mut result: Vec<Value> = vec![];
     for i in items.iter() {
         let pid=i.to_owned();
        
         result.push( Value::int(pid.into(),span));
     }
-    // sysinfo::Process::;
     match result.len() {
         0 => Value::nothing(span),
-        1 => result.first().unwrap().clone(),
-        _ => Value::list(result, span)
+        _ => result.first().unwrap().clone(),
     }
 }
 
-fn load_process_info(items: &Vec<u32>,skip: bool, span: Span) -> Value {
+fn load_process_info(items: &Vec<u32>,skip: bool, span: Span,process_list: &HashMap<String, &Process>) -> Value {
     if skip {
         return Value::nothing(span);
     }
-    // TODO receive from caller
-    let mut process_list: HashMap<String, &Process>=HashMap::new();
-    for (pid, process) in SYSTEM.processes() {
-        process_list.insert(pid.to_owned().to_string(),process);
-    }
+    
     let mut result: Vec<Value> = vec![];
     for i in items.iter() {
         let pid=i.to_owned();
