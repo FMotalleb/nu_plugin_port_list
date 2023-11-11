@@ -1,5 +1,5 @@
 
-use netstat::{AddressFamilyFlags, ProtocolFlags, get_sockets_info, ProtocolSocketInfo};
+use netstat2::{AddressFamilyFlags, ProtocolFlags, get_sockets_info, ProtocolSocketInfo};
 use nu_plugin::{self, EvaluatedCall, LabeledError};
 use nu_protocol::{record, Category, PluginSignature, Span, Value};
 
@@ -18,7 +18,7 @@ impl nu_plugin::Plugin for Plugin {
         call: &EvaluatedCall,
         _input: &Value,
     ) -> Result<Value, LabeledError> {
-        let af_flags = AddressFamilyFlags::IPV4 | AddressFamilyFlags::IPV6;
+        let af_flags =  AddressFamilyFlags::IPV4 | AddressFamilyFlags::IPV6;
         let proto_flags = ProtocolFlags::TCP | ProtocolFlags::UDP;
         let sockets_info = get_sockets_info(af_flags, proto_flags);
         let mut other: Vec<Value> = vec![];

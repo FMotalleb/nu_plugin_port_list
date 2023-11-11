@@ -6,11 +6,11 @@ keywords = ["nushell", "network", "plugin"]
 homepage = "https://github.com/FMotalleb/nu_plugin_port_list"
 repository = "https://github.com/FMotalleb/nu_plugin_port_list"
 description = "A nushell plugin to list all active connections"
-version = "1.0.0"
+version = "1.0.1"
 edition = "2021"
 readme = "README.md"
 
 [dependencies]
 nu-plugin = "0.86.0"
 nu-protocol = { version = "0.86.0", features = ["plugin"] }
-netstat = "0.7.0"
+netstat2 = "0.9.0"
