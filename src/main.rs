@@ -50,7 +50,6 @@ impl nu_plugin::Plugin for Plugin {
                 process_list.insert(pid.to_owned().to_string(),process);
             });
         }
-        // let af_flags =  AddressFamilyFlags::IPV4 | AddressFamilyFlags::IPV6;
         
         let sockets_info = get_sockets_info(af_flags, proto_flags);
         let mut other: Vec<Value> = vec![];
