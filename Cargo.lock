@@ -759,9 +759,11 @@ dependencies = [
 name = "nu_plugin_port_list"
 version = "1.0.2"
 dependencies = [
+ "lazy_static",
  "netstat2",
  "nu-plugin",
  "nu-protocol",
+ "sysinfo",
 ]
 
 [[package]]

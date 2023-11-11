@@ -1,10 +1,17 @@
 
-use std::net::IpAddr;
-
+use std::{net::IpAddr, collections::HashMap};
 use netstat2::{AddressFamilyFlags, ProtocolFlags, get_sockets_info, ProtocolSocketInfo};
 use nu_plugin::{self, EvaluatedCall, LabeledError};
 use nu_protocol::{record, Category, PluginSignature, Span, Value};
-
+use lazy_static::lazy_static;
+use sysinfo::{
+   System, SystemExt, ProcessExt, Process,
+};
+lazy_static! {
+    pub static ref  SYSTEM: System = {
+        return System::new_all();
+    };
+}
 pub struct Plugin;
 
 impl nu_plugin::Plugin for Plugin {
@@ -15,6 +22,7 @@ impl nu_plugin::Plugin for Plugin {
             .switch("disable-ipv6","do not fetch ivp6 connections (ipv4 only)",Some('4'))
             .switch("disable-udp","do not fetch udp connections (tcp only)",Some('t'))
             .switch("disable-tcp","do not fetch tcp connections (udp only)",Some('u'))
+            .switch("process-info","loads process info (name,cmd, binary path)",Some('p'))
             .category(Category::Experimental)]
     }
 
@@ -26,7 +34,7 @@ impl nu_plugin::Plugin for Plugin {
     ) -> Result<Value, LabeledError> {
         let mut af_flags= AddressFamilyFlags::IPV4 | AddressFamilyFlags::IPV6 ;
         let mut proto_flags = ProtocolFlags::TCP | ProtocolFlags::UDP;
-
+        let skip_process_info=!call.has_flag("process-info");
         if call.has_flag("disable-ipv4") {
             af_flags=af_flags & AddressFamilyFlags::IPV6;
         }
@@ -58,7 +66,9 @@ impl nu_plugin::Plugin for Plugin {
                                     "remote_address" => Value::string(tcp_si.remote_addr.to_string(),call.head),
                                     "remote_port" => Value::int(tcp_si.remote_port.into(),call.head),
                                     "state" => Value::string(tcp_si.state.to_string(),call.head),
-                                    "pid"=>map_to_values(si.associated_pids,call.head)
+                                    "pid"=>map_to_values(&si.associated_pids,call.head),
+                                    "process"=>load_process_info(&si.associated_pids,skip_process_info,call.head)
+                                    
                                 }, 
                                 call.head)
                             )
@@ -73,7 +83,8 @@ impl nu_plugin::Plugin for Plugin {
                                     "remote_address" => Value::string("Unknown".to_string(),call.head),
                                     "remote_port" => Value::string("Unknown".to_string(),call.head),
                                     "state" => Value::string("Unknown".to_string(),call.head),
-                                    "pid"=>map_to_values(si.associated_pids,call.head)
+                                    "pid"=>map_to_values(&si.associated_pids,call.head),
+                                    "process"=>load_process_info(&si.associated_pids,skip_process_info,call.head)
                                 },
                                 call.head)
                             )
@@ -96,16 +107,52 @@ impl nu_plugin::Plugin for Plugin {
 fn main() {
     nu_plugin::serve_plugin(&mut Plugin {}, nu_plugin::MsgPackSerializer {})
 }
-fn map_to_values(items: Vec<u32>, span: Span) -> Value {
+fn map_to_values(items: &Vec<u32>, span: Span) -> Value {
+    
     let mut result: Vec<Value> = vec![];
     for i in items.iter() {
-        result.push(Value::int(i.to_owned().into(), span))
+        let pid=i.to_owned();
+       
+        result.push( Value::int(pid.into(),span));
     }
+    // sysinfo::Process::;
     match result.len() {
         0 => Value::nothing(span),
         1 => result.first().unwrap().clone(),
         _ => Value::list(result, span)
     }
+}
+
+fn load_process_info(items: &Vec<u32>,skip: bool, span: Span) -> Value {
+    if skip {
+        return Value::nothing(span);
+    }
+    // TODO receive from caller
+    let mut process_list: HashMap<String, &Process>=HashMap::new();
+    for (pid, process) in SYSTEM.processes() {
+        process_list.insert(pid.to_owned().to_string(),process);
+    }
+    let mut result: Vec<Value> = vec![];
+    for i in items.iter() {
+        let pid=i.to_owned();
+        let process = process_list.get(&pid.to_string());
+        if let Some(process_info) =  process {
+            result.push(Value::record(record!{
+                "pid" => Value::int(pid.into(),span),
+                "name"=>Value::string(process_info.name().to_string(), span),
+                "cmd"=>Value::string(process_info.cmd().join(" ").to_string(), span),
+                "exe_path"=>Value::string(process_info.exe().to_owned().to_str().unwrap_or("-").to_string(), span),
+    
+            }, span))
+        }
+        
+    } 
+    match result.len() {
+        0 => Value::nothing(span),
+        1 => result.first().unwrap().clone(),
+        _ => Value::list(result, span)
+    }
+    
 }
 
 fn get_ip_version(addr: IpAddr,span: Span) -> Value{
