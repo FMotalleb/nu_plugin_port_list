@@ -1,6 +1,9 @@
 # nu_plugin_port_list
 
 A [nushell](https://www.nushell.sh/) plugin to display all active network connections.
+similar to `netstat -lntp`
+
+**Important**: to list pid correctly it needs to run as a privileged user (root)
 
 # Examples
 
