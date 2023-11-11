@@ -2,7 +2,7 @@
 use std::{net::IpAddr, collections::HashMap};
 use netstat2::{AddressFamilyFlags, ProtocolFlags, get_sockets_info, ProtocolSocketInfo};
 use nu_plugin::{self, EvaluatedCall, LabeledError};
-use nu_protocol::{record, Category, PluginSignature, Span, Value};
+use nu_protocol::{record, Category, PluginSignature, Span, Value, Record};
 
 use sysinfo::{
    System, SystemExt, ProcessExt, Process,
@@ -60,7 +60,7 @@ impl nu_plugin::Plugin for Plugin {
                     match si.protocol_socket_info {
                         ProtocolSocketInfo::Tcp(tcp_si) =>{
                             other.push(Value::record(
-                                record!{
+                                load_process_info_into(  &mut record!{
                                     "type" => Value::string("tcp".to_string(),call.head),
                                     "ip_version" => get_ip_version(tcp_si.local_addr,call.head),
                                     "local_address" => Value::string(tcp_si.local_addr.to_string(),call.head),
@@ -69,15 +69,14 @@ impl nu_plugin::Plugin for Plugin {
                                     "remote_port" => Value::int(tcp_si.remote_port.into(),call.head),
                                     "state" => Value::string(tcp_si.state.to_string(),call.head),
                                     "pid"=>load_pid(&si.associated_pids,call.head),
-                                    "process"=>load_process_info(&si.associated_pids,skip_process_info,call.head,&process_list)
                                     
-                                }, 
+                                },&si.associated_pids,skip_process_info,call.head,&process_list), 
                                 call.head)
                             )
                         }
                         ProtocolSocketInfo::Udp(udp_si) => {
                         other.push(Value::record(
-                                record!{
+                            load_process_info_into(  &mut record!{
                                     "type" => Value::string("udp".to_string(),call.head),
                                     "ip_version" => get_ip_version(udp_si.local_addr,call.head),
                                     "local_address" => Value::string(udp_si.local_addr.to_string(),call.head),
@@ -86,8 +85,7 @@ impl nu_plugin::Plugin for Plugin {
                                     "remote_port" => Value::string("Unknown".to_string(),call.head),
                                     "state" => Value::string("Unknown".to_string(),call.head),
                                     "pid"=>load_pid(&si.associated_pids,call.head),
-                                    "process"=>load_process_info(&si.associated_pids,skip_process_info,call.head,&process_list)
-                                },
+                                },&si.associated_pids,skip_process_info,call.head,&process_list),
                                 call.head)
                             )
                         },
@@ -122,32 +120,23 @@ fn load_pid(items: &Vec<u32>, span: Span) -> Value {
     }
 }
 
-fn load_process_info(items: &Vec<u32>,skip: bool, span: Span,process_list: &HashMap<String, &Process>) -> Value {
+fn load_process_info_into(rec : &mut Record ,items: &Vec<u32>,skip: bool, span: Span,process_list: &HashMap<String, &Process>) -> Record {
     if skip {
-        return Value::nothing(span);
+        return rec.to_owned();
     }
     
-    let mut result: Vec<Value> = vec![];
     for i in items.iter() {
         let pid=i.to_owned();
         let process = process_list.get(&pid.to_string());
         if let Some(process_info) =  process {
-            result.push(Value::record(record!{
-                "pid" => Value::int(pid.into(),span),
-                "name"=>Value::string(process_info.name().to_string(), span),
-                "cmd"=>Value::string(process_info.cmd().join(" ").to_string(), span),
-                "exe_path"=>Value::string(process_info.exe().to_owned().to_str().unwrap_or("-").to_string(), span),
-    
-            }, span))
+            rec.push("name" , Value::string(process_info.name().to_string(), span));
+            rec.push("cmd" , Value::string(process_info.cmd().join(" ").to_string(), span));
+            rec.push("exe_path" , Value::string(process_info.exe().to_owned().to_str().unwrap_or("-").to_string(), span));
         }
+        break;
         
     } 
-    match result.len() {
-        0 => Value::nothing(span),
-        1 => result.first().unwrap().clone(),
-        _ => Value::list(result, span)
-    }
-    
+    rec.to_owned()
 }
 
 fn get_ip_version(addr: IpAddr,span: Span) -> Value{
