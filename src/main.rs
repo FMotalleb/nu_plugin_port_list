@@ -1,4 +1,6 @@
 
+use std::net::IpAddr;
+
 use netstat2::{AddressFamilyFlags, ProtocolFlags, get_sockets_info, ProtocolSocketInfo};
 use nu_plugin::{self, EvaluatedCall, LabeledError};
 use nu_protocol::{record, Category, PluginSignature, Span, Value};
@@ -9,6 +11,10 @@ impl nu_plugin::Plugin for Plugin {
     fn signature(&self) -> Vec<PluginSignature> {
         vec![PluginSignature::build("port list")
             .usage("list all active connections (tcp+udp)")
+            .switch("disable-ipv4","do not fetch ivp6 connections (ipv6 only)",Some('6'))
+            .switch("disable-ipv6","do not fetch ivp6 connections (ipv4 only)",Some('4'))
+            .switch("disable-udp","do not fetch udp connections (tcp only)",Some('t'))
+            .switch("disable-tcp","do not fetch tcp connections (udp only)",Some('u'))
             .category(Category::Experimental)]
     }
 
@@ -18,8 +24,24 @@ impl nu_plugin::Plugin for Plugin {
         call: &EvaluatedCall,
         _input: &Value,
     ) -> Result<Value, LabeledError> {
-        let af_flags =  AddressFamilyFlags::IPV4 | AddressFamilyFlags::IPV6;
-        let proto_flags = ProtocolFlags::TCP | ProtocolFlags::UDP;
+        let mut af_flags= AddressFamilyFlags::IPV4 | AddressFamilyFlags::IPV6 ;
+        let mut proto_flags = ProtocolFlags::TCP | ProtocolFlags::UDP;
+
+        if call.has_flag("disable-ipv4") {
+            af_flags=af_flags & AddressFamilyFlags::IPV6;
+        }
+        if call.has_flag("disable-ipv6") {
+            af_flags=af_flags & AddressFamilyFlags::IPV4;
+        } 
+        if call.has_flag("disable-udp") {
+            proto_flags=proto_flags & ProtocolFlags::TCP;
+        }
+        if call.has_flag("disable-tcp") {
+            proto_flags=proto_flags & ProtocolFlags::UDP;
+        }
+        
+        // let af_flags =  AddressFamilyFlags::IPV4 | AddressFamilyFlags::IPV6;
+        
         let sockets_info = get_sockets_info(af_flags, proto_flags);
         let mut other: Vec<Value> = vec![];
         match sockets_info {
@@ -30,12 +52,13 @@ impl nu_plugin::Plugin for Plugin {
                             other.push(Value::record(
                                 record!{
                                     "type" => Value::string("tcp".to_string(),call.head),
+                                    "ip_version" => get_ip_version(tcp_si.local_addr,call.head),
                                     "local_address" => Value::string(tcp_si.local_addr.to_string(),call.head),
                                     "local_port" => Value::int(tcp_si.local_port.into(),call.head),
                                     "remote_address" => Value::string(tcp_si.remote_addr.to_string(),call.head),
                                     "remote_port" => Value::int(tcp_si.remote_port.into(),call.head),
                                     "state" => Value::string(tcp_si.state.to_string(),call.head),
-                                    "pids"=>map_to_values(si.associated_pids,call.head)
+                                    "pid"=>map_to_values(si.associated_pids,call.head)
                                 }, 
                                 call.head)
                             )
@@ -44,12 +67,13 @@ impl nu_plugin::Plugin for Plugin {
                         other.push(Value::record(
                                 record!{
                                     "type" => Value::string("udp".to_string(),call.head),
+                                    "ip_version" => get_ip_version(udp_si.local_addr,call.head),
                                     "local_address" => Value::string(udp_si.local_addr.to_string(),call.head),
                                     "local_port" => Value::int(udp_si.local_port.into(),call.head),
                                     "remote_address" => Value::string("Unknown".to_string(),call.head),
                                     "remote_port" => Value::string("Unknown".to_string(),call.head),
                                     "state" => Value::string("Unknown".to_string(),call.head),
-                                    "pids"=>map_to_values(si.associated_pids,call.head)
+                                    "pid"=>map_to_values(si.associated_pids,call.head)
                                 },
                                 call.head)
                             )
@@ -77,9 +101,16 @@ fn map_to_values(items: Vec<u32>, span: Span) -> Value {
     for i in items.iter() {
         result.push(Value::int(i.to_owned().into(), span))
     }
-    if result.len() == 1 {
-        result.first().unwrap().clone()
-    } else {
-        Value::list(result, span)
+    match result.len() {
+        0 => Value::nothing(span),
+        1 => result.first().unwrap().clone(),
+        _ => Value::list(result, span)
+    }
+}
+
+fn get_ip_version(addr: IpAddr,span: Span) -> Value{
+    match addr {
+        IpAddr::V4(_) => Value::int(4, span),
+        IpAddr::V6(_) => Value::int(6, span),
     }
 }
