@@ -62,8 +62,7 @@ similar to `netstat -ntp`
 
 ```bash
 git clone https://github.com/FMotalleb/nu_plugin_port_list.git
-cd nu_plugin_port_list
-nupm install --path . -f
+nupm install --path nu_plugin_port_list -f
 ```
 
 * or compile manually
