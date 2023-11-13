@@ -19,30 +19,31 @@ similar to `netstat -ntp`
 
 * list all open ports
 ```bash
-~>port list
-╭───┬──────┬───────────────┬────────────┬────────────────┬─────────────┬────────┬────────────────╮
-│ # │ type │ local_address │ local_port │ remote_address │ remote_port │ state  │      pids      │
-├───┼──────┼───────────────┼────────────┼────────────────┼─────────────┼────────┼────────────────┤
-│ 0 │ tcp  │ 127.0.0.1     │        631 │ 0.0.0.0        │           0 │ LISTEN │ [list 0 items] │
-│ 1 │ tcp  │ 0.0.0.0       │       7070 │ 0.0.0.0        │           0 │ LISTEN │            973 │
-│ 2 │ tcp  │ 0.0.0.0       │         22 │ 0.0.0.0        │           0 │ LISTEN │           1010 │
-│ 3 │ tcp  │ 127.0.0.1     │       6463 │ 0.0.0.0        │           0 │ LISTEN │          46595 │
-│ 4 │ tcp  │ 0.0.0.0       │       9000 │ 0.0.0.0        │           0 │ LISTEN │           1537 │
-╰───┴──────┴───────────────┴────────────┴────────────────┴─────────────┴────────┴────────────────╯
+~> port list
 ```
+|type|ip_version|local_address|local_port|remote_address|remote_port|state|pid|
+|-|-|-|-|-|-|-|-|
+|tcp|4|0.0.0.0|22|0.0.0.0|0|LISTEN|1000|
+|tcp|4|192.168.100.8|42352|...|780|ESTABLISHED|9343|
+|tcp|4|192.168.100.8|60564|...|443|ESTABLISHED|2899|
+|tcp|4|127.0.0.1|38946|127.0.0.1|7890|ESTABLISHED|3376|
+|tcp|4|127.0.0.1|50180|127.0.0.1|37921|ESTABLISHED|7620|
+
+
 
  * list all open tcp port that are in LISTEN state and using local address 0.0.0.0
 
  ```bash
 ~> port list | where state == LISTEN and local_address == 0.0.0.0
-╭───┬──────┬───────────────┬────────────┬────────────────┬─────────────┬────────┬──────╮
-│ # │ type │ local_address │ local_port │ remote_address │ remote_port │ state  │ pids │
-├───┼──────┼───────────────┼────────────┼────────────────┼─────────────┼────────┼──────┤
-│ 0 │ tcp  │ 0.0.0.0       │       7070 │ 0.0.0.0        │           0 │ LISTEN │  973 │
-│ 1 │ tcp  │ 0.0.0.0       │         22 │ 0.0.0.0        │           0 │ LISTEN │ 1010 │
-│ 2 │ tcp  │ 0.0.0.0       │       9000 │ 0.0.0.0        │           0 │ LISTEN │ 1537 │
-╰───┴──────┴───────────────┴────────────┴────────────────┴─────────────┴────────┴──────╯
 ```
+|type|ip_version|local_address|local_port|remote_address|remote_port|state|pid|
+|-|-|-|-|-|-|-|-|
+|tcp|4|0.0.0.0|7070|0.0.0.0|0|LISTEN|993|
+|tcp|4|0.0.0.0|3306|0.0.0.0|0|LISTEN|9953|
+|tcp|4|0.0.0.0|9000|0.0.0.0|0|LISTEN|1525|
+|tcp|4|0.0.0.0|8585|0.0.0.0|0|LISTEN|10693|
+|tcp|4|0.0.0.0|22|0.0.0.0|0|LISTEN|1000|
+
 
 * get process that is listening on a port
 
