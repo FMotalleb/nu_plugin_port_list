@@ -8,8 +8,8 @@ similar to `netstat -ntp`
 * flags
 
 ```bash
-  -6, --disable-ipv4 - do not fetch ivp6 connections (ipv6 only)
-  -4, --disable-ipv6 - do not fetch ivp6 connections (ipv4 only)
+  -6, --disable-ipv4 - do not fetch ipv4 connections (ipv6 only)
+  -4, --disable-ipv6 - do not fetch ipv6 connections (ipv4 only)
   -t, --disable-udp - do not fetch UDP connections (TCP only)
   -u, --disable-tcp - do not fetch TCP connections (UDP only)
   -p, --process-info - loads process info (name, cmd, binary path)
