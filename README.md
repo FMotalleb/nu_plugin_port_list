@@ -6,7 +6,7 @@ similar to `netstat -ntp`
 **Important**: to list pid correctly it needs to run as a privileged user (root)
 
 * flags
-* 
+
 ```bash
   -6, --disable-ipv4 - do not fetch ivp6 connections (ipv6 only)
   -4, --disable-ipv6 - do not fetch ivp6 connections (ipv4 only)
