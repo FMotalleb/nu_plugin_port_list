@@ -149,9 +149,16 @@ fn load_process_info_into(rec : &mut Record ,items: &Vec<u32>,skip: bool, span: 
         let pid=i.to_owned();
         let process = process_list.get(&pid.to_string());
         if let Some(process_info) =  process {
-            rec.push("name" , Value::string(process_info.name().to_string(), span));
+            
+            rec.push("process_name" , Value::string(process_info.name().to_string(), span));
             rec.push("cmd" , Value::string(process_info.cmd().join(" ").to_string(), span));
             rec.push("exe_path" , Value::string(process_info.exe().to_owned().to_str().unwrap_or("-").to_string(), span));
+            rec.push("process_status" , Value::string(process_info.status().to_string(), span));
+            rec.push("process_user" , Value::string(process_info.user_id().map(|uid| uid.to_string()).unwrap_or("-".to_string()), span));
+            rec.push("process_group" , Value::string(process_info.group_id().map(|gid| gid.to_string()).unwrap_or("-".to_string()), span));
+            rec.push("process_effective_user" , Value::string(process_info.effective_user_id().map(|uid| uid.to_string()).unwrap_or("-".to_string()), span));
+            rec.push("process_effective_group" , Value::string(process_info.effective_group_id().map(|gid| gid.to_string()).unwrap_or("-".to_string()), span));
+            rec.push("process_environments", Value::list(map_environments(process_info.environ(),span), span))
         }
         break;
         
@@ -164,4 +171,11 @@ fn get_ip_version(addr: IpAddr,span: Span) -> Value{
         IpAddr::V4(_) => Value::int(4, span),
         IpAddr::V6(_) => Value::int(6, span),
     }
+}
+fn map_environments(environments:&[String],span:Span)->Vec<Value>{
+    let mut values:Vec<Value>=vec![];
+    for i in environments {
+        values.push(Value::string(i, span))
+    }
+    values
 }
