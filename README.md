@@ -47,9 +47,12 @@ similar to `netstat -ntp`
 * get process that is listening on a port
 
 ```bash
-~> let pid = (port list | where local_port == 7890 | get pids | first)
-~> ps | where pid == $pid
+~> port list -t4p
 ```
+|type|ip_version|local_address|local_port|remote_address|remote_port|state|pid|name|cmd|exe_path|
+|-|-|-|-|-|-|-|-|-|-|-|
+|tcp|4|127.0.0.1|34657|0.0.0.0|0|LISTEN|9390|ssh|ssh -v -T -D ...|/usr/bin/ssh|
+
 
 # Installing
 
