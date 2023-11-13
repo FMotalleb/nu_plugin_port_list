@@ -57,7 +57,16 @@ similar to `netstat -ntp`
 
 # Installing
 
-* via git
+
+* using [nupm](https://github.com/nushell/nupm)
+
+```bash
+git clone https://github.com/FMotalleb/nu_plugin_port_list.git
+cd nu_plugin_port_list
+nupm install --path . -f
+```
+
+* or compile manually
 
 ```bash
 git clone https://github.com/FMotalleb/nu_plugin_port_list.git
