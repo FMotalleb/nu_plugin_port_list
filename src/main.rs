@@ -13,13 +13,35 @@ pub struct Plugin;
 impl nu_plugin::Plugin for Plugin {
     fn signature(&self) -> Vec<PluginSignature> {
         vec![PluginSignature::build("port list")
-            .usage("list all active connections (tcp+udp)")
-            .switch("disable-ipv4","do not fetch ivp6 connections (ipv6 only)",Some('6'))
-            .switch("disable-ipv6","do not fetch ivp6 connections (ipv4 only)",Some('4'))
-            .switch("disable-udp","do not fetch udp connections (tcp only)",Some('t'))
-            .switch("disable-tcp","do not fetch tcp connections (udp only)",Some('u'))
-            .switch("process-info","loads process info (name,cmd, binary path)",Some('p'))
-            .category(Category::Experimental)]
+            .usage("list all active connections (TCP+UDP)")
+            .switch("disable-ipv4","do not fetch ipv6 connections (ipv6 only)",Some('6'))
+            .switch("disable-ipv6","do not fetch ipv4 connections (ipv4 only)",Some('4'))
+            .switch("disable-udp","do not fetch UDP connections (TCP only)",Some('t'))
+            .switch("disable-tcp","do not fetch TCP connections (UDP only)",Some('u'))
+            .switch("process-info","loads process info (name, cmd, binary path)",Some('p'))
+
+            // .input_output_types(vec![
+            //     (
+            //         Type::Nothing,
+            //         Type::Table(
+            //             vec![
+            //                 ("type".to_string(),Type::Custom("Enum(tcp,udp)".to_string())),
+            //                 ("ip_version".to_string(),Type::Int),
+            //                 ("ip_version".to_string(),Type::Int),
+            //                 ("local_address".to_string(),Type::String),
+            //                 ("local_port".to_string(),Type::Int),
+            //                 ("remote_address".to_string(),Type::String),
+            //                 ("remote_port".to_string(),Type::Int),
+            //                 ("state".to_string(),Type::String),
+            //                 ("pid".to_string(),Type::Int),
+            //                 ("name".to_string(),Type::String),
+            //                 ("cmd".to_string(),Type::String),
+            //                 ("exe_path".to_string(),Type::String),
+            //             ]
+            //         )
+            //     ),
+            // ])
+            .category(Category::Network)]
     }
 
     fn run(
@@ -99,7 +121,6 @@ impl nu_plugin::Plugin for Plugin {
                 })
             }
         }
-
         return Ok(Value::list(other, call.head));
     }
 }
