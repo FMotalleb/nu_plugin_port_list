@@ -1,9 +1,19 @@
 # nu_plugin_port_list
 
 A [nushell](https://www.nushell.sh/) plugin to display all active network connections.
-similar to `netstat -lntp`
+similar to `netstat -ntp`
 
 **Important**: to list pid correctly it needs to run as a privileged user (root)
+
+* flags
+* 
+```bash
+  -6, --disable-ipv4 - do not fetch ivp6 connections (ipv6 only)
+  -4, --disable-ipv6 - do not fetch ivp6 connections (ipv4 only)
+  -t, --disable-udp - do not fetch UDP connections (TCP only)
+  -u, --disable-tcp - do not fetch TCP connections (UDP only)
+  -p, --process-info - loads process info (name, cmd, binary path)
+```
 
 # Examples
 
