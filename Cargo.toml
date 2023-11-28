@@ -1,17 +1,20 @@
-[package]
-name = "nu_plugin_port_list"
-license = "MIT"
-authors = ["Motalleb Fallahnezhad <fmotalleb@gmail.com>"]
-keywords = ["nushell", "network", "plugin"]
-homepage = "https://github.com/FMotalleb/nu_plugin_port_list"
-repository = "https://github.com/FMotalleb/nu_plugin_port_list"
-description = "A nushell plugin to list all active connections"
-version = "1.2.2"
-edition = "2021"
-readme = "README.md"
-
 [dependencies]
-nu-plugin = "0.87.0"
-nu-protocol = { version = "0.87.0", features = ["plugin"] }
-netstat2 = "0.9.0"
-sysinfo = "0.29.10"
+netstat2 = "0.9.1"
+nu-plugin = "0.87.1"
+sysinfo = "0.29.11"
+
+[dependencies.nu-protocol]
+features = ["plugin"]
+version = "0.87.1"
+
+[package]
+authors = ["Motalleb Fallahnezhad <fmotalleb@gmail.com>"]
+description = "A nushell plugin to list all active connections"
+edition = "2021"
+homepage = "https://github.com/FMotalleb/nu_plugin_port_list"
+keywords = ["nushell", "network", "plugin"]
+license = "MIT"
+name = "nu_plugin_port_list"
+readme = "README.md"
+repository = "https://github.com/FMotalleb/nu_plugin_port_list"
+version = "1.2.3"
