@@ -758,7 +758,7 @@ dependencies = [
 
 [[package]]
 name = "nu_plugin_port_list"
-version = "1.2.3"
+version = "1.2.4"
 dependencies = [
  "netstat2",
  "nu-plugin",
