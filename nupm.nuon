@@ -1,0 +1,1 @@
+{name: nu_plugin_port_list, version: "1.2.7", description: "A Nushell plugin to display all active network connections.", license: LICENSE, type: custom}
