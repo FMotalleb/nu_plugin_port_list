@@ -5,7 +5,7 @@ use nu_plugin::{self, EvaluatedCall, LabeledError};
 use nu_protocol::{record, Category, PluginSignature, Span, Value, Record};
 
 use sysinfo::{
-   System, SystemExt, ProcessExt, Process,
+   System,  Process,
 };
 
 pub struct Plugin;
@@ -47,22 +47,26 @@ impl nu_plugin::Plugin for Plugin {
     fn run(
         &mut self,
         _name: &str,
+        _config: &Option<Value>,
         call: &EvaluatedCall,
         _input: &Value,
     ) -> Result<Value, LabeledError> {
         let mut af_flags= AddressFamilyFlags::IPV4 | AddressFamilyFlags::IPV6 ;
         let mut proto_flags = ProtocolFlags::TCP | ProtocolFlags::UDP;
-        let skip_process_info=!call.has_flag("process-info");
-        if call.has_flag("disable-ipv4") {
+        let skip_process_info=match call.has_flag("process-info"){
+            Ok(value)=>!value,
+            Err(_)=>false,
+        };
+        if let Ok(true)= call.has_flag("disable-ipv4") {
             af_flags=af_flags & AddressFamilyFlags::IPV6;
         }
-        if call.has_flag("disable-ipv6") {
+        if let Ok(true)= call.has_flag("disable-ipv6") {
             af_flags=af_flags & AddressFamilyFlags::IPV4;
         } 
-        if call.has_flag("disable-udp") {
+        if let Ok(true)= call.has_flag("disable-udp") {
             proto_flags=proto_flags & ProtocolFlags::TCP;
         }
-        if call.has_flag("disable-tcp") {
+        if let Ok(true)= call.has_flag("disable-tcp") {
             proto_flags=proto_flags & ProtocolFlags::UDP;
         }
         let mut process_list: HashMap<String, &Process>=HashMap::new();
@@ -152,7 +156,7 @@ fn load_process_info_into(rec : &mut Record ,items: &Vec<u32>,skip: bool, span: 
             
             rec.push("process_name" , Value::string(process_info.name().to_string(), span));
             rec.push("cmd" , Value::string(process_info.cmd().join(" ").to_string(), span));
-            rec.push("exe_path" , Value::string(process_info.exe().to_owned().to_str().unwrap_or("-").to_string(), span));
+            rec.push("exe_path" , Value::string(process_info.exe().map(|f| f.to_str().unwrap_or("-")).unwrap_or("-").to_string(), span));
             rec.push("process_status" , Value::string(process_info.status().to_string(), span));
             rec.push("process_user" , Value::string(process_info.user_id().map(|uid| uid.to_string()).unwrap_or("-".to_string()), span));
             rec.push("process_group" , Value::string(process_info.group_id().map(|gid| gid.to_string()).unwrap_or("-".to_string()), span));
