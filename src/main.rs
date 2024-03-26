@@ -1,7 +1,7 @@
 
 use std::{net::IpAddr, collections::HashMap};
-use netstat2::{AddressFamilyFlags, ProtocolFlags, get_sockets_info, ProtocolSocketInfo};
-use nu_plugin::{self, EvaluatedCall, LabeledError};
+use netstat2::{get_sockets_info, AddressFamilyFlags, ProtocolFlags, ProtocolSocketInfo, TcpState};
+use nu_plugin::{EvaluatedCall, LabeledError};
 use nu_protocol::{record, Category, PluginSignature, Span, Value, Record};
 
 use sysinfo::{
@@ -18,6 +18,7 @@ impl nu_plugin::Plugin for Plugin {
             .switch("disable-ipv6","do not fetch ipv4 connections (ipv4 only)",Some('4'))
             .switch("disable-udp","do not fetch UDP connections (TCP only)",Some('t'))
             .switch("disable-tcp","do not fetch TCP connections (UDP only)",Some('u'))
+            .switch("listeners","only listeners (equivalent to state == \"LISTEN\")",Some('l'))
             .switch("process-info","loads process info (name, cmd, binary path)",Some('p'))
 
             // .input_output_types(vec![
@@ -53,6 +54,7 @@ impl nu_plugin::Plugin for Plugin {
     ) -> Result<Value, LabeledError> {
         let mut af_flags= AddressFamilyFlags::IPV4 | AddressFamilyFlags::IPV6 ;
         let mut proto_flags = ProtocolFlags::TCP | ProtocolFlags::UDP;
+      
         let skip_process_info=match call.has_flag("process-info"){
             Ok(value)=>!value,
             Err(_)=>false,
@@ -69,6 +71,11 @@ impl nu_plugin::Plugin for Plugin {
         if let Ok(true)= call.has_flag("disable-tcp") {
             proto_flags=proto_flags & ProtocolFlags::UDP;
         }
+        let listeners_only=match call.has_flag("listeners"){
+            Ok(true)=>true,
+            _=>false
+        };
+        
         let mut process_list: HashMap<String, &Process>=HashMap::new();
         let sys=System::new_all();
         if skip_process_info!=true {
@@ -82,6 +89,14 @@ impl nu_plugin::Plugin for Plugin {
         match sockets_info {
             Ok(sockets_info) => {
                 for si in sockets_info {
+                    if listeners_only {
+                        if let ProtocolSocketInfo::Tcp(tcp_si) = &si.protocol_socket_info{
+                            if tcp_si.state!=TcpState::Listen {
+                                continue;
+                            }
+                        } 
+                    }
+                    
                     match si.protocol_socket_info {
                         ProtocolSocketInfo::Tcp(tcp_si) =>{
                             other.push(Value::record(
@@ -108,7 +123,7 @@ impl nu_plugin::Plugin for Plugin {
                                     "local_port" => Value::int(udp_si.local_port.into(),call.head),
                                     "remote_address" => Value::string("Unknown".to_string(),call.head),
                                     "remote_port" => Value::string("Unknown".to_string(),call.head),
-                                    "state" => Value::string("Unknown".to_string(),call.head),
+                                    "state" => Value::string("LISTEN".to_string(),call.head),
                                     "pid"=>load_pid(&si.associated_pids,call.head),
                                 },&si.associated_pids,skip_process_info,call.head,&process_list),
                                 call.head)
