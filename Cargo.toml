@@ -1,11 +1,11 @@
 [dependencies]
 netstat2 = "0.9.1"
-nu-plugin = "0.92.1"
+nu-plugin = "0.93.0"
 sysinfo = "0.30.5"
 
 [dependencies.nu-protocol]
 features = ["plugin"]
-version = "0.92.1"
+version = "0.93.0"
 
 [package]
 authors = ["Motalleb Fallahnezhad <fmotalleb@gmail.com>"]
@@ -17,4 +17,4 @@ license = "MIT"
 name = "nu_plugin_port_list"
 readme = "README.md"
 repository = "https://github.com/FMotalleb/nu_plugin_port_list"
-version = "1.3.0"
+version = "1.4.0"
