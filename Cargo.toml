@@ -1,11 +1,11 @@
 [dependencies]
 netstat2 = "0.9.1"
-nu-plugin = "0.96.0"
-sysinfo = "0.30.5"
+nu-plugin = "0.97.1"
+sysinfo = "0.31.2"
 
 [dependencies.nu-protocol]
 features = ["plugin"]
-version = "0.96.0"
+version = "0.97.1"
 
 [package]
 authors = ["Motalleb Fallahnezhad <fmotalleb@gmail.com>"]
