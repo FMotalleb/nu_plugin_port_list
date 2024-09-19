@@ -15,7 +15,7 @@ similar to `netstat -ntp`
   -p, --process-info - loads process info (process_name, cmd, binary path, ...)
 ```
 
-# Examples
+## Examples
 
 * list all open ports
 
@@ -55,7 +55,7 @@ similar to `netstat -ntp`
 |-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
 |tcp|4|127.0.0.1|631|0.0.0.0|0|LISTEN|986|cupsd|/usr/sbin/cupsd -l|/usr/sbin/cupsd|Sleeping|0|0|0|0|[LANG=en_US.UTF-8,...]|
 
-# Installing
+## Installing
 
 * using [nupm](https://github.com/nushell/nupm)
 
@@ -70,12 +70,12 @@ nupm install --path nu_plugin_port_list -f
 git clone https://github.com/FMotalleb/nu_plugin_port_list.git
 cd nu_plugin_port_list
 cargo build -r
-register target/release/nu_plugin_port_list
+plugin add target/release/nu_plugin_port_list
 ```
 
 * or using cargo
 
 ```bash
 cargo install nu_plugin_port_list
-register ~/.cargo/bin/nu_plugin_port_list
+plugin add ~/.cargo/bin/nu_plugin_port_list
 ```
