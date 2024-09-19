@@ -190,7 +190,7 @@ impl PluginCommand for PortList {
             .category(Category::Network)
     }
 
-    fn usage(&self) -> &str {
+    fn description(&self) -> &str {
         "Like netstat this command will return every open connection on the network interface"
     }
 
