@@ -1,4 +1,5 @@
 [dependencies]
+libc = "=0.2.155"
 netstat2 = "0.9.1"
 nu-plugin = "0.100.0"
 sysinfo = "0.32.0"
