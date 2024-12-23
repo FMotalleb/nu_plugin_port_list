@@ -1,12 +1,13 @@
 [dependencies]
-libc = "=0.2.155"
-netstat2 = "0.9.1"
-nu-plugin = "0.100.0"
-sysinfo = "0.32.0"
+# It was pinned due to https://github.com/ohadravid/netstat2-rs/issues/15, which is resolved
+# libc = "=0.2.169"
+netstat2 = "0.11.1"
+nu-plugin = "0.101.0"
+sysinfo = "0.33.0"
 
 [dependencies.nu-protocol]
 features = ["plugin"]
-version = "0.100.0"
+version = "0.101.0"
 
 [package]
 authors = ["Motalleb Fallahnezhad <fmotalleb@gmail.com>"]
@@ -18,4 +19,4 @@ license = "MIT"
 name = "nu_plugin_port_list"
 readme = "README.md"
 repository = "https://github.com/FMotalleb/nu_plugin_port_list"
-version = "1.4.5"
+version = "1.4.6"
