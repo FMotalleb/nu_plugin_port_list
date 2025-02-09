@@ -247,23 +247,29 @@ impl PluginCommand for PortList {
                     match si.protocol_socket_info {
                         ProtocolSocketInfo::Tcp(tcp_si) =>{
                             other.push(Value::record(
-                                Self::load_process_info_into(  &mut record!{
-                                    "type" => Value::string("tcp".to_string(),call.head),
-                                    "ip_version" => Self::get_ip_version(tcp_si.local_addr,call.head),
-                                    "local_address" => Value::string(tcp_si.local_addr.to_string(),call.head),
-                                    "local_port" => Value::int(tcp_si.local_port.into(),call.head),
-                                    "remote_address" => Value::string(tcp_si.remote_addr.to_string(),call.head),
-                                    "remote_port" => Value::int(tcp_si.remote_port.into(),call.head),
-                                    "state" => Value::string(tcp_si.state.to_string(),call.head),
-                                    "pid"=>Self::load_pid(&si.associated_pids,call.head),
-
-                                },&si.associated_pids,skip_process_info,call.head,&process_list),
+                                Self::load_process_info_into(
+                                    &mut record!{
+                                        "type" => Value::string("tcp".to_string(),call.head),
+                                        "ip_version" => Self::get_ip_version(tcp_si.local_addr,call.head),
+                                        "local_address" => Value::string(tcp_si.local_addr.to_string(),call.head),
+                                        "local_port" => Value::int(tcp_si.local_port.into(),call.head),
+                                        "remote_address" => Value::string(tcp_si.remote_addr.to_string(),call.head),
+                                        "remote_port" => Value::int(tcp_si.remote_port.into(),call.head),
+                                        "state" => Value::string(tcp_si.state.to_string(),call.head),
+                                        "pid"=>Self::load_pid(&si.associated_pids,call.head),
+                                    },
+                                    &si.associated_pids,
+                                    skip_process_info,
+                                    call.head,
+                                    &process_list
+                                ),
                                 call.head)
                             )
                         }
                         ProtocolSocketInfo::Udp(udp_si) => {
                             other.push(Value::record(
-                                Self::load_process_info_into(  &mut record!{
+                            Self::load_process_info_into(
+                                &mut record!{
                                     "type" => Value::string("udp".to_string(),call.head),
                                     "ip_version" => Self::get_ip_version(udp_si.local_addr,call.head),
                                     "local_address" => Value::string(udp_si.local_addr.to_string(),call.head),
@@ -272,7 +278,12 @@ impl PluginCommand for PortList {
                                     "remote_port" => Value::int(-1,call.head),
                                     "state" => Value::string("LISTEN".to_string(),call.head),
                                     "pid"=>Self::load_pid(&si.associated_pids,call.head),
-                                },&si.associated_pids,skip_process_info,call.head,&process_list),
+                                },
+                                &si.associated_pids,
+                                skip_process_info,
+                                call.head,
+                                &process_list
+                                ),
                                 call.head)
                             )
                         },
