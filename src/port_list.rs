@@ -282,17 +282,7 @@ impl PluginCommand for PortList {
                 }
             }
             Err(err) => {
-                return Err(LabeledError {
-                    msg: err.to_string(),
-                    labels: vec![ErrorLabel {
-                        text: "cannot list active sockets".to_string(),
-                        span: call.head,
-                    }],
-                    code: None,
-                    url: None,
-                    help: None,
-                    inner: vec![],
-                })
+                return Err(LabeledError::new(err.to_string()).with_code("sockets_info::fetch"))
             }
         };
         return Ok(PipelineData::Value(Value::list(other, call.head), None));
