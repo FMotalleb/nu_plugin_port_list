@@ -2,9 +2,7 @@ use crate::helper::ToStr;
 use crate::PortListPlugin;
 use netstat2::{get_sockets_info, AddressFamilyFlags, ProtocolFlags, ProtocolSocketInfo, TcpState};
 use nu_plugin::{EngineInterface, EvaluatedCall, PluginCommand};
-use nu_protocol::{
-    record, Category, ErrorLabel, LabeledError, PipelineData, Record, Signature, Span, Value,
-};
+use nu_protocol::{record, Category, LabeledError, PipelineData, Record, Signature, Span, Value};
 use std::collections::HashMap;
 use std::iter::Iterator;
 use std::net::IpAddr;
