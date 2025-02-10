@@ -1,4 +1,9 @@
-# nu_plugin_port_list
+# nu_plugin_port_list (Now Deprecated)
+
+Latest version of nushell supported: 0.102.0
+Deprecated in favor of [nu_plugin_port_extension](https://github.com/FMotalleb/nu_plugin_port_extension.git)
+which will be a mix of this plugin and port scan plugin
+cli signature is not changed but output result is now more stable
 
 A [nushell](https://www.nushell.sh/) plugin to display all active network connections.
 similar to `netstat -ntp`
